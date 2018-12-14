@@ -1,2 +1,1 @@
-# lab6
-Code for Lab 6: Functors
+# Lab 6: Functors
