@@ -5,33 +5,65 @@
 
 module Lab6 where
 
---------------------------------------------------------------------------------
-
-import Data.Char
-import Data.Maybe
+import Prelude hiding (Functor(..))
 
 --------------------------------------------------------------------------------
--- Parsers
 
-data Parser a = MkParser (String -> Maybe (a, String))
+-- | We are definig our own copy of the Functor type class here rather than
+-- using the one from Prelude so that we can redefine instances for it that
+-- already exist in Prelude.
+class Functor f where
+    fmap :: (a -> b) -> f a -> f b
 
--- | Runs a parser on some input. If successful, the result of the parser
--- is returned along with any remaining input.
-parse :: Parser a -> String -> Maybe (a, String)
-parse (MkParser f) xs = f xs
-
--- | A function which, given a predicate, constructs a parser that succeeds
--- if the first character in the input satisfies the predicate.
-ch :: (Char -> Bool) -> Parser Char
-ch p = MkParser $ \xs -> case xs of
-    (y:ys) | p y -> undefined
-    _            -> undefined
+instance Functor [] where
+    fmap = map
 
 --------------------------------------------------------------------------------
--- Parsers are functors
 
-instance Functor Parser where
-    fmap f (MkParser g) =
-        MkParser $ \xs -> undefined
+-- | This type is a wrapper around values of some type.
+data Identity a = Identity a
+    deriving (Eq, Show)
+
+-- | 'runIdentity' @action@ extracts the value from @action@.
+runIdentity :: Identity a -> a
+runIdentity (Identity a) = a
+
+instance Functor Identity where
+    fmap = undefined
+
+--------------------------------------------------------------------------------
+
+data Const v a = Const v
+    deriving (Eq, Show)
+
+-- | 'getConst' @action@ extracts the value from @action@.
+getConst :: Const v a -> v
+getConst (Const x) = x
+
+instance Functor (Const v) where
+    fmap = undefined
+
+--------------------------------------------------------------------------------
+
+-- | Represents two-dimensional points.
+data Point a = Point a a
+    deriving (Eq, Show)
+
+instance Functor Point where
+    fmap = undefined
+
+--------------------------------------------------------------------------------
+
+-- | Represents rose trees.
+data RoseTree a = Leaf a | Node [RoseTree a]
+    deriving (Eq, Show)
+
+instance Functor RoseTree where
+    fmap = undefined
+
+--------------------------------------------------------------------------------
+
+instance Functor ((->) r) where
+    fmap = undefined
 
 --------------------------------------------------------------------------------
