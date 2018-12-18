@@ -11,8 +11,6 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
 
-import Data.Char
-
 import qualified Lab6 as L
 
 --------------------------------------------------------------------------------
@@ -110,5 +108,23 @@ main = hspec $ do
             let f = (+1)
                 g = (*2)
             in L.fmap (f . g) rt === (L.fmap f . L.fmap g) rt
+    describe "Functor instance for Compose" $ do
+        it "fmap (+5) (Compose [[1,2,3], [4,5,6]])\n\t==> Compose [[6,7,8], [9,10,11]]" $
+            L.fmap (+5) (L.Compose [[1,2,3], [4,5,6]]) `shouldBe`
+            L.Compose [[6,7,8], [9,10,11]]
+        it "fmap not (Compose [Just True, Just False, Nothing])\n\t==> Compose [Just False, Just True, Nothing]" $
+            L.fmap not (L.Compose [Just True, Just False, Nothing]) `shouldBe`
+            L.Compose [Just False, Just True, Nothing]
+        it "fmap even (Compose (Node [Leaf [1,2,3]]))\n\t==> Compose (Node [Leaf [False, True, False]])" $
+            L.fmap even (L.Compose (L.Node [L.Leaf [1,2,3]])) `shouldBe`
+            L.Compose (L.Node [L.Leaf [False, True, False]])
+        it "fmap (+5) (Compose (Compose [[[1,2],[3]], [[4],[5,6]]]))\n\t==> Compose (Compose [[[6,7],[8]],[[9],[10,11]]])" $
+            L.fmap (+5) (L.Compose (L.Compose [[[1,2],[3]], [[4],[5,6]]])) `shouldBe`
+            L.Compose (L.Compose [[[6,7],[8]],[[9],[10,11]]])
+    describe "Functor instance for State" $ do
+        it "runState (fmap (*2) fresh) 4 ==> (8,5)" $
+            L.runState (L.fmap (*2) L.fresh) 4 `shouldBe` (8,5)
+        it "runState (fmap show fresh) 7 ==> (\"7\",8)" $
+            L.runState (L.fmap show L.fresh) 7 `shouldBe` ("7",8)
 
 --------------------------------------------------------------------------------

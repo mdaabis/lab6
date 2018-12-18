@@ -18,6 +18,10 @@ class Functor f where
 instance Functor [] where
     fmap = map
 
+instance Functor Maybe where
+    fmap f Nothing = Nothing
+    fmap f (Just x) = Just (f x)
+
 --------------------------------------------------------------------------------
 
 -- | This type is a wrapper around values of some type.
@@ -60,6 +64,34 @@ data RoseTree a = Leaf a | Node [RoseTree a]
 
 instance Functor RoseTree where
     fmap = undefined
+
+--------------------------------------------------------------------------------
+
+-- | A type that represents values of type @f (g a)@.
+data Compose f g a = Compose (f (g a))
+    deriving (Eq, Show)
+
+instance (Functor f, Functor g) => Functor (Compose f g) where
+    fmap = undefined
+
+--------------------------------------------------------------------------------
+
+-- | A type that wraps around a "stateful" function.
+data State s a = St (s -> (a, s))
+
+-- | 'runState' @action initialState@ runs the computation represented by
+-- @action@ using the initial state @initialState@.
+runState :: State s a -> s -> (a, s)
+runState (St m) s = m s
+
+-- | 'fresh' represents a computation which implements the behaviour of a
+-- counter that returns the current state and sets the resulting state to the
+-- old state incremented by one.
+fresh :: State Int Int
+fresh = St (\s -> (s,s+1))
+
+instance Functor (State s) where
+    fmap f (St m) = undefined
 
 --------------------------------------------------------------------------------
 
